@@ -1,6 +1,7 @@
 package com.kshitij.cloudprint.controller;
 
 import com.kshitij.cloudprint.ContentType;
+import com.kshitij.cloudprint.configuration.CloudPrintProperties;
 import com.kshitij.cloudprint.retrofit.AuthApi;
 import com.kshitij.cloudprint.retrofit.Intercepter;
 import com.kshitij.cloudprint.retrofit.SubmitOutput;
@@ -23,22 +24,21 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/print")
 public class PrintController {
-    /*@Autowired
-    CloudPrintProperties properties;*/
+    @Autowired
+    CloudPrintProperties properties;
     @Autowired
     FilesController filesController;
     @Autowired
     ContentType type;
 
-
     @PostMapping(value = "/submit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void submitJob(@RequestParam("file") MultipartFile file) {
         AuthApi api = new Retrofit
                 .Builder()
-                .baseUrl("https://www.google.com/cloudprint/")
+                .baseUrl(properties.getBaseUrl())
                 .client(new OkHttpClient
                         .Builder()
-                        .addInterceptor(new Intercepter("ya29.GlsnBtRioESEXerzyW1I6HP6VQxdo_vUTAUpSm5ulaP4j3CgCQn6GctOnOs9_kwqZXoc2QaQY1l6WfZb2ifmU1klwBIHlaLnFWsDChzuo-Gv0TLjaSLaXTkG0CAI")).build())
+                        .addInterceptor(new Intercepter(properties.getToken())).build())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(AuthApi.class);
@@ -53,7 +53,7 @@ public class PrintController {
                 "}";
         try {
             Call<SubmitOutput> call = api.submitJob(
-                    "8d31c85a-6681-43ef-1cb1-fdc6150b71dd",
+                    properties.getPrinterId(),
                     name[0],
                     ticket,
                     file.getBytes(),
