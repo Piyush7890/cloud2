@@ -1,4 +1,4 @@
-package com.kshitij.cloudprint;
+package com.kshitij.cloudprint.configuration;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
