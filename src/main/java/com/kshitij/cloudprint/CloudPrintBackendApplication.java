@@ -9,6 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.annotation.PostConstruct;
 
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 
 @SpringBootApplication
 public class CloudPrintBackendApplication {
@@ -23,4 +25,9 @@ public class CloudPrintBackendApplication {
     public void init() {
         logger.info(properties.toString());
     }
+
+    /*@Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }*/
 }

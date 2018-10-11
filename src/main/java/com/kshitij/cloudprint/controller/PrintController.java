@@ -3,8 +3,12 @@ package com.kshitij.cloudprint.controller;
 import com.kshitij.cloudprint.ContentType;
 import com.kshitij.cloudprint.configuration.CloudPrintProperties;
 import com.kshitij.cloudprint.configuration.EncryptionHelper;
+import com.kshitij.cloudprint.configuration.JwtTokenUtil;
+import com.kshitij.cloudprint.model.LoginResponse;
+import com.kshitij.cloudprint.model.User;
 import com.kshitij.cloudprint.retrofit.AuthApi;
 import com.kshitij.cloudprint.retrofit.SubmitOutput;
+import com.kshitij.cloudprint.service.LoginService;
 import com.mongodb.client.gridfs.GridFSBucket;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -33,6 +37,10 @@ public class PrintController {
     GridFSBucket bucket;
     @Autowired
     EncryptionHelper encryptionHelper;
+    @Autowired
+    LoginService loginService;
+    @Autowired
+    JwtTokenUtil jwtTokenUtil;
 
     @PostMapping(value = "/submit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity submit(@RequestParam("file") MultipartFile file) throws IOException {
@@ -92,6 +100,19 @@ public class PrintController {
         System.out.println(credentials);
         String plainText = encryptionHelper.decrypt(credentials);
         System.out.println(plainText);
+    }
+
+    @PostMapping("/signup2")
+    public ResponseEntity<LoginResponse> signup2(@RequestParam("username") String username, @RequestParam("password") String password) {
+        LoginResponse response;
+        if (loginService.userExist(username)) {
+            response = new LoginResponse("", "User already exist", false);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        User user = loginService.create(new User(username, password));
+        String token = jwtTokenUtil.generateToken(user);
+        response = new LoginResponse(token, "Signup Successful!", true);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /*@GetMapping("/checksum")
