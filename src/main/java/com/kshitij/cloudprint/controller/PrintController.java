@@ -2,6 +2,7 @@ package com.kshitij.cloudprint.controller;
 
 import com.kshitij.cloudprint.ContentType;
 import com.kshitij.cloudprint.configuration.CloudPrintProperties;
+import com.kshitij.cloudprint.configuration.EncryptionHelper;
 import com.kshitij.cloudprint.retrofit.AuthApi;
 import com.kshitij.cloudprint.retrofit.SubmitOutput;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -12,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,33 +22,20 @@ import retrofit2.Response;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/print")
 public class PrintController {
     @Autowired
     CloudPrintProperties properties;
-    @Autowired
-    FilesController filesController;
     @Autowired
     ContentType type;
     @Autowired
     AuthApi api;
     @Autowired
     GridFSBucket bucket;
+    @Autowired
+    EncryptionHelper encryptionHelper;
 
     @PostMapping(value = "/submit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity submit(@RequestParam("file") MultipartFile file) throws IOException {
-        /*AuthApi api = new Retrofit
-                .Builder()
-                .baseUrl(properties.getBaseUrl())
-                .client(new OkHttpClient
-                        .Builder()
-                        .readTimeout(60, TimeUnit.SECONDS)
-                        .writeTimeout(60,TimeUnit.SECONDS)
-                        .connectTimeout(60, TimeUnit.SECONDS)
-                        .addInterceptor(new Intercepter(properties.getToken())).build())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-                .create(AuthApi.class);*/
         String name[] = file.getOriginalFilename().split("\\.");
         String ticket = "{\n" +
                 "  \"version\": \"1.0\",\n" +
@@ -63,8 +50,6 @@ public class PrintController {
         byte[] content = new byte[length];
         downloadStream.read(content);
         downloadStream.close();*/
-        /*ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(file.getBytes());
-        InputStreamBody inputStreamBody = new InputStreamBody(byteArrayInputStream, org.apache.http.entity.ContentType.create("application/pdf"),name[0]);*/
         RequestBody printerIdPart = RequestBody.create(MultipartBody.FORM, properties.getPrinterId());
         RequestBody titlePart = RequestBody.create(MultipartBody.FORM, name[0]);
         RequestBody ticketPart = RequestBody.create(MultipartBody.FORM, ticket);
@@ -82,6 +67,7 @@ public class PrintController {
                 filePart,
                 contentTypePart
         );
+
         Response<SubmitOutput> response = call.execute();
         if (response.isSuccessful())
             return ResponseEntity.ok(response.body());
@@ -100,4 +86,16 @@ public class PrintController {
             }
         });*/
     }
+
+    @PostMapping("/signup")
+    public void signup(@RequestParam("credentials") String credentials) throws Exception {
+        System.out.println(credentials);
+        String plainText = encryptionHelper.decrypt(credentials);
+        System.out.println(plainText);
+    }
+
+    /*@GetMapping("/checksum")
+    public Response<String> checksum(@RequestParam("token") String token, @RequestParam("price") Float price) {
+
+    }*/
 }
