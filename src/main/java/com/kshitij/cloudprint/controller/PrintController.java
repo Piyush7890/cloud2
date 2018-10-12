@@ -1,16 +1,18 @@
 package com.kshitij.cloudprint.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.kshitij.cloudprint.ContentType;
 import com.kshitij.cloudprint.configuration.CloudPrintProperties;
 import com.kshitij.cloudprint.configuration.EncryptionHelper;
 import com.kshitij.cloudprint.configuration.JwtTokenUtil;
+import com.kshitij.cloudprint.model.Checksum;
 import com.kshitij.cloudprint.model.LoginResponse;
 import com.kshitij.cloudprint.model.User;
 import com.kshitij.cloudprint.retrofit.AuthApi;
 import com.kshitij.cloudprint.retrofit.SubmitOutput;
 import com.kshitij.cloudprint.service.LoginService;
 import com.mongodb.client.gridfs.GridFSBucket;
+import com.paytm.pg.merchant.CheckSumServiceHelper;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.TreeMap;
 
 @RestController
 public class PrintController {
@@ -102,7 +105,7 @@ public class PrintController {
         System.out.println(credentials);
         String plainText = encryptionHelper.decrypt(credentials);
         System.out.println(plainText);
-        User user = new ObjectMapper().readValue(plainText, User.class);
+        User user = new Gson().fromJson(plainText, User.class);
         LoginResponse response;
         if (loginService.userNameExist(user.getUsername())) {
             response = new LoginResponse("", "User already exist", false);
@@ -134,7 +137,7 @@ public class PrintController {
         System.out.println(credentials);
         String plainText = encryptionHelper.decrypt(credentials);
         System.out.println(plainText);
-        User user = new ObjectMapper().readValue(plainText, User.class);
+        User user = new Gson().fromJson(plainText, User.class);
         String encryptedPassword = encryptionHelper.encrypt(user.getPassword());
         user = loginService.loginWith(user.getUsername(), encryptedPassword);
         LoginResponse response;
@@ -156,5 +159,29 @@ public class PrintController {
         if (jwtTokenUtil.validateToken(token))
             return Boolean.TRUE;
         return Boolean.FALSE;
+    }
+
+    @GetMapping("/checksum")
+    public ResponseEntity<Checksum> checksum(@RequestParam("token") String id, @RequestParam("price") String price) {
+        TreeMap<String, String> paramMap = new TreeMap<String, String>();
+        paramMap.put("MID", "PICTPr16616768265254");
+        paramMap.put("ORDER_ID", id);
+        paramMap.put("CUST_ID", id);
+        paramMap.put("TXN_AMOUNT", price);
+        paramMap.put("WEBSITE", "com.PICT.PICTPrint");
+        paramMap.put("CHANNEL_ID", "WAP");
+        paramMap.put("INDUSTRY_TYPE_ID", "Retail");
+
+        paramMap.put("CALLBACK_URL", "https://pguat.paytm.com/paytmchecksum/paytmCallback.jsp");
+        try {
+
+            String checkSum = CheckSumServiceHelper.getCheckSumServiceHelper().genrateCheckSum("NkmxKHRAzUubC&8f", paramMap);
+            return ResponseEntity.status(HttpStatus.OK).body(new Checksum(checkSum));
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Checksum(""));
     }
 }
