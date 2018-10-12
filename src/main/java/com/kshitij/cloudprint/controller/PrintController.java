@@ -1,5 +1,6 @@
 package com.kshitij.cloudprint.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kshitij.cloudprint.ContentType;
 import com.kshitij.cloudprint.configuration.CloudPrintProperties;
 import com.kshitij.cloudprint.configuration.EncryptionHelper;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -96,27 +98,63 @@ public class PrintController {
     }
 
     @PostMapping("/signup")
-    public void signup(@RequestParam("credentials") String credentials) throws Exception {
+    public ResponseEntity<LoginResponse> signup(@RequestParam("credentials") String credentials) throws Exception {
         System.out.println(credentials);
         String plainText = encryptionHelper.decrypt(credentials);
         System.out.println(plainText);
+        User user = new ObjectMapper().readValue(plainText, User.class);
+        LoginResponse response;
+        if (loginService.userNameExist(user.getUsername())) {
+            response = new LoginResponse("", "User already exist", false);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        String encryptedPassword = encryptionHelper.encrypt(user.getPassword());
+        user = loginService.create(new User(user.getUsername(), encryptedPassword));
+        String token = jwtTokenUtil.generateToken(user);
+        response = new LoginResponse(token, "Signup Successful!", true);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/signup2")
     public ResponseEntity<LoginResponse> signup2(@RequestParam("username") String username, @RequestParam("password") String password) {
         LoginResponse response;
-        if (loginService.userExist(username)) {
+        if (loginService.userNameExist(username)) {
             response = new LoginResponse("", "User already exist", false);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-        User user = loginService.create(new User(username, password));
+        String encryptedPassword = encryptionHelper.encrypt(password);
+        User user = loginService.create(new User(username, encryptedPassword));
         String token = jwtTokenUtil.generateToken(user);
         response = new LoginResponse(token, "Signup Successful!", true);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestParam("credentials") String credentials) throws Exception {
+        System.out.println(credentials);
+        String plainText = encryptionHelper.decrypt(credentials);
+        System.out.println(plainText);
+        User user = new ObjectMapper().readValue(plainText, User.class);
+        String encryptedPassword = encryptionHelper.encrypt(user.getPassword());
+        user = loginService.loginWith(user.getUsername(), encryptedPassword);
+        LoginResponse response;
+        if (user != null) {
+            String token = jwtTokenUtil.generateToken(user);
+            response = new LoginResponse(token, "Login Successful!", true);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
+        response = new LoginResponse("", "Wrong credentials", false);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     /*@GetMapping("/checksum")
     public Response<String> checksum(@RequestParam("token") String token, @RequestParam("price") Float price) {
 
     }*/
+    @GetMapping("/checkToken")
+    public Boolean checkToken(@RequestParam("token") String token) {
+        if (jwtTokenUtil.validateToken(token))
+            return Boolean.TRUE;
+        return Boolean.FALSE;
+    }
 }

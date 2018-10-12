@@ -18,8 +18,16 @@ public class LoginService {
         return repository.save(user);
     }
 
-    public boolean userExist(String username) {
+    public boolean userNameExist(String username) {
         List<User> users = repository.findByUsername(username);
         return !users.isEmpty();
+    }
+
+    public User loginWith(String username, String password) {
+        List<User> users = repository.findByUsernameAndAndPassword(username, password);
+        if (users.isEmpty())
+            return null;
+        else
+            return users.get(0);
     }
 }
