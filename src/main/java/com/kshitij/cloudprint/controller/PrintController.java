@@ -13,8 +13,6 @@ import com.kshitij.cloudprint.retrofit.AuthApi;
 import com.kshitij.cloudprint.retrofit.SubmitOutput;
 import com.kshitij.cloudprint.service.LoginService;
 import com.mongodb.client.gridfs.GridFSBucket;
-
-import com.paytm.pg.merchant.CheckSumServiceHelper;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,29 +162,29 @@ public class PrintController {
         return Boolean.FALSE;
     }
 
-    @GetMapping("/checksum")
-    public ResponseEntity<Checksum> checksum(@RequestParam("token") String id,
-                                             @RequestParam("orderid") String orderid,
-                                             @RequestParam("price") String price) {
-        TreeMap<String, String> paramMap = new TreeMap<String, String>();
-        paramMap.put("MID", "PICTPr16616768265254");
-        paramMap.put("ORDER_ID", orderid);
-        paramMap.put("CUST_ID", id);
-        paramMap.put("TXN_AMOUNT", price);
-        paramMap.put("WEBSITE", "APPSTAGING");
-        paramMap.put("CHANNEL_ID", "WAP");
-        paramMap.put("INDUSTRY_TYPE_ID", "Retail");
-
-        paramMap.put("CALLBACK_URL", "https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=");
-        try {
-
-            String checkSum = CheckSumServiceHelper.getCheckSumServiceHelper().genrateCheckSum("NkmxKHRAzUubC&8f", paramMap);
-            return ResponseEntity.status(HttpStatus.OK).body(new Checksum(checkSum));
-
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Checksum(""));
-    }
+//    @GetMapping("/checksum")
+//    public ResponseEntity<Checksum> checksum(@RequestParam("token") String id,
+//                                             @RequestParam("orderid") String orderid,
+//                                             @RequestParam("price") String price) {
+//        TreeMap<String, String> paramMap = new TreeMap<String, String>();
+//        paramMap.put("MID", "PICTPr16616768265254");
+//        paramMap.put("ORDER_ID", orderid);
+//        paramMap.put("CUST_ID", id);
+//        paramMap.put("TXN_AMOUNT", price);
+//        paramMap.put("WEBSITE", "APPSTAGING");
+//        paramMap.put("CHANNEL_ID", "WAP");
+//        paramMap.put("INDUSTRY_TYPE_ID", "Retail");
+//
+//        paramMap.put("CALLBACK_URL", "https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=");
+//        try {
+//
+//            String checkSum = CheckSumServiceHelper.getCheckSumServiceHelper().genrateCheckSum("NkmxKHRAzUubC&8f", paramMap);
+//            return ResponseEntity.status(HttpStatus.OK).body(new Checksum(checkSum));
+//
+//        } catch (Exception e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Checksum(""));
+//    }
 }

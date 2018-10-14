@@ -81,13 +81,13 @@
             <version>0.9.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>checksum</groupId>
-            <artifactId>checksum</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/checksum.jar</systemPath>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>checksum</groupId>-->
+            <!--<artifactId>checksum</artifactId>-->
+            <!--<version>1.0.0</version>-->
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${basedir}/lib/checksum.jar</systemPath>-->
+        <!--</dependency>-->
     </dependencies>
 
     <build>
@@ -96,29 +96,29 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-install-plugin</artifactId>
-            <version>2.5.2</version>
-            <executions>
-                <execution>
-                    <id>install-external</id>
-                    <phase>clean</phase>
-                    <configuration>
-                        <file>${basedir}/src/lib/checksum.jar</file>
-                        <repositoryLayout>default</repositoryLayout>
-                        <groupId>checksum</groupId>
-                        <artifactId>checksum</artifactId>
-                        <version>1.0.0</version>
-                        <packaging>jar</packaging>
-                        <generatePom>true</generatePom>
-                    </configuration>
-                    <goals>
-                        <goal>install-file</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
+        <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-install-plugin</artifactId>-->
+            <!--<version>2.5.2</version>-->
+            <!--<executions>-->
+                <!--<execution>-->
+                    <!--<id>install-external</id>-->
+                    <!--<phase>clean</phase>-->
+                    <!--<configuration>-->
+                        <!--<file>${basedir}/src/lib/checksum.jar</file>-->
+                        <!--<repositoryLayout>default</repositoryLayout>-->
+                        <!--<groupId>checksum</groupId>-->
+                        <!--<artifactId>checksum</artifactId>-->
+                        <!--<version>1.0.0</version>-->
+                        <!--<packaging>jar</packaging>-->
+                        <!--<generatePom>true</generatePom>-->
+                    <!--</configuration>-->
+                    <!--<goals>-->
+                        <!--<goal>install-file</goal>-->
+                    <!--</goals>-->
+                <!--</execution>-->
+            <!--</executions>-->
+        <!--</plugin>-->
         </plugins>
 
     </build>
