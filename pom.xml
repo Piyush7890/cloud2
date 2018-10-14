@@ -28,10 +28,10 @@
     <dependencies>
 
         <dependency>
-            <groupId>checksum</groupId>
-            <artifactId>checksum</artifactId>
+            <groupId>checksum_2.0.0</groupId>
+            <artifactId>checksum_2.0.0</artifactId>
             <scope>system</scope>
-            <version>2.0</version>
+            <version>1.0</version>
             <systemPath>${basedir}\lib\checksum_2.0.0.jar</systemPath>
         </dependency>
 
