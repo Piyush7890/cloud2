@@ -29,8 +29,8 @@
     <dependencies>
 
         <dependency>
-            <groupId>checksum_2.0.0</groupId>
-            <artifactId>checksum_2.0.0</artifactId>
+            <groupId>checksum</groupId>
+            <artifactId>checksum</artifactId>
             <version>1.0.0</version>
 
 
@@ -113,10 +113,10 @@
                     <id>install-external</id>
                     <phase>clean</phase>
                     <configuration>
-                        <file>${basedir}/src/lib/checksum_2.0.0.jar</file>
+                        <file>${basedir}/src/lib/checksum.jar</file>
                         <repositoryLayout>default</repositoryLayout>
-                        <groupId>checksum_2.0.0</groupId>
-                        <artifactId>checksum_2.0.0</artifactId>
+                        <groupId>checksum</groupId>
+                        <artifactId>checksum</artifactId>
                         <version>1.0.0</version>
                         <packaging>jar</packaging>
                         <generatePom>true</generatePom>
