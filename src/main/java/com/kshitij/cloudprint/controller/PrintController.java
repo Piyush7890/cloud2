@@ -1,5 +1,6 @@
 package com.kshitij.cloudprint.controller;
 
+import com.fasterxml.jackson.databind.deser.std.StringArrayDeserializer;
 import com.google.gson.Gson;
 import com.kshitij.cloudprint.ContentType;
 import com.kshitij.cloudprint.configuration.CloudPrintProperties;
@@ -47,31 +48,32 @@ public class PrintController {
     @Autowired
     JwtTokenUtil jwtTokenUtil;
 
+
     @PostMapping(value = "/submit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity submit(@RequestParam("file") MultipartFile file) throws IOException {
-        String name[] = file.getOriginalFilename().split("\\.");
-        String ticket = "{\n" +
-                "  \"version\": \"1.0\",\n" +
-                "  \"print\": {\n" +
-                "    \"vendor_ticket_item\": [],\n" +
-                "    \"color\": {\"type\": \"STANDARD_MONOCHROME\"},\n" +
-                "    \"copies\": {\"copies\": 1}\n" +
-                "  }\n" +
-                "}";
+    public ResponseEntity submit(@RequestParam("file") MultipartFile file, @RequestParam("ticket")String ticket) throws IOException {
+        String name[] = file.getOriginalFilename().split("//.");
+//        String ticket = "{\n" +
+//                "  \"version\": \"1.0\",\n" +
+//                "  \"print\": {\n" +
+//                "    \"vendor_ticket_item\": [],\n" +
+//                "    \"color\": {\"type\": \"STANDARD_MONOCHROME\"},\n" +
+//                "    \"copies\": {\"copies\": 1}\n" +
+//                "  }\n" +
+//                "}";
         /*GridFSDownloadStream downloadStream = bucket.openDownloadStream("QT Cheatsheet.pdf");
         int length = (int) downloadStream.getGridFSFile().getLength();
         byte[] content = new byte[length];
         downloadStream.read(content);
         downloadStream.close();*/
         RequestBody printerIdPart = RequestBody.create(MultipartBody.FORM, properties.getPrinterId());
-        RequestBody titlePart = RequestBody.create(MultipartBody.FORM, name[0]);
+        RequestBody titlePart = RequestBody.create(MultipartBody.FORM, file.getOriginalFilename());
         RequestBody ticketPart = RequestBody.create(MultipartBody.FORM, ticket);
-        RequestBody contentTypePart = RequestBody.create(MultipartBody.FORM, type.getContentType(name[1]));
+        RequestBody contentTypePart = RequestBody.create(MultipartBody.FORM, file.getContentType());
         RequestBody contentPart = RequestBody.create(
                 okhttp3.MediaType.parse(file.getContentType()),
                 file.getBytes()
         );
-        MultipartBody.Part filePart = MultipartBody.Part.createFormData("content", name[0], contentPart);
+        MultipartBody.Part filePart = MultipartBody.Part.createFormData("content", file.getName(), contentPart);
 
         Call<SubmitOutput> call = api.submitJob(
                 printerIdPart,
@@ -162,17 +164,19 @@ public class PrintController {
     }
 
     @GetMapping("/checksum")
-    public ResponseEntity<Checksum> checksum(@RequestParam("token") String id, @RequestParam("price") String price) {
+    public ResponseEntity<Checksum> checksum(@RequestParam("token") String id,
+                                             @RequestParam("orderid") String orderid,
+                                             @RequestParam("price") String price) {
         TreeMap<String, String> paramMap = new TreeMap<String, String>();
         paramMap.put("MID", "PICTPr16616768265254");
-        paramMap.put("ORDER_ID", id);
+        paramMap.put("ORDER_ID", orderid);
         paramMap.put("CUST_ID", id);
         paramMap.put("TXN_AMOUNT", price);
-        paramMap.put("WEBSITE", "com.PICT.PICTPrint");
+        paramMap.put("WEBSITE", "APPSTAGING");
         paramMap.put("CHANNEL_ID", "WAP");
         paramMap.put("INDUSTRY_TYPE_ID", "Retail");
 
-        paramMap.put("CALLBACK_URL", "https://pguat.paytm.com/paytmchecksum/paytmCallback.jsp");
+        paramMap.put("CALLBACK_URL", "https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=");
         try {
 
             String checkSum = CheckSumServiceHelper.getCheckSumServiceHelper().genrateCheckSum("NkmxKHRAzUubC&8f", paramMap);
